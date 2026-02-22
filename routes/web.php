@@ -13,6 +13,8 @@ Route::middleware('guest')->group(function () {
     Route::post('/register', [AuthController::class, 'register']);
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
     Route::post('/login', [AuthController::class, 'login']);
+    // Put this inside your auth middleware group if you have one!
+    Route::patch('/songs/{id}/like', [SongController::class, 'toggleLike'])->name('songs.like');
 });
 
 // 3. Auth Routes (Only for logged-in users)

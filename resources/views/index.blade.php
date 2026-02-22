@@ -38,7 +38,8 @@
 
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             @foreach($songs as $song)
-            <div class="bg-zinc-800 p-4 rounded-lg hover:bg-zinc-700 transition group relative">
+            {{-- ADDED ID HERE FOR JAVASCRIPT TO FIND --}}
+            <div id="song-row-{{ $song->id }}" class="bg-zinc-800 p-4 rounded-lg hover:bg-zinc-700 transition group relative">
                 <div class="relative aspect-square mb-4 bg-black rounded-md overflow-hidden shadow-lg">
                     <img src="{{ $song->album_cover ?? 'https://placehold.co/300x300' }}" 
                          alt="Album Art" 
@@ -51,7 +52,16 @@
                 <p class="text-sm text-zinc-400 truncate mb-4">{{ $song->artist }}</p>
 
                 <div class="flex justify-end items-center gap-3 border-t border-zinc-600 pt-3 mt-2">
-                    {{-- Update this part in your @foreach loop --}}
+                    {{-- DYNAMIC LIKE BUTTON --}}
+                    <button class="like-btn text-zinc-400 hover:text-red-500 transition" data-id="{{ $song->id }}">
+                        <svg class="w-5 h-5 {{ $song->is_liked ? 'text-red-500 fill-current' : 'text-zinc-400 fill-none' }}" 
+                            stroke="currentColor" 
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z">
+                            </path>
+                        </svg>
+                    </button>
                     <a href="/{{ $song->id }}" class="text-zinc-400 hover:text-white" title="View Details">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
@@ -63,7 +73,8 @@
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                     </a>
 
-                    <form action="/{{ $song->id }}" method="POST" onsubmit="return confirm('Delete this song forever?');">
+                    {{-- UPDATED FORM: Added class delete-form and data-id --}}
+                    <form action="/{{ $song->id }}" method="POST" class="delete-form" data-id="{{ $song->id }}">
                         @csrf
                         @method('DELETE')
                         <button type="submit" class="text-red-500 hover:text-red-400" title="Delete">
@@ -78,7 +89,8 @@
 
     <footer class="h-16 bg-zinc-900 border-t border-zinc-800 px-6 flex items-center justify-between">
         <div class="text-zinc-400 text-sm">
-            <span class="text-green-500 font-bold">{{ count($songs) }}</span> Songs in Library
+            {{-- ADDED ID song-count HERE --}}
+            <span id="song-count" class="text-green-500 font-bold">{{ count($songs) }}</span> Songs in Library
         </div>
         <div class="text-zinc-600 text-xs uppercase tracking-widest font-semibold">
             MusicLib &copy; 2026
@@ -89,4 +101,67 @@
         </div>
     </footer>
 </main>
+
+{{-- DYNAMIC JAVASCRIPT COMPONENT --}}
+<script>
+// This function runs when someone clicks a delete button
+function deleteSong(songId) {
+    
+    // 1. Ask for confirmation (Standard JS)
+    if (!confirm('Are you sure?')) return;
+
+    // 2. The AJAX call (The "Fetch" part)
+    fetch('/songs/' + songId, {
+        method: 'DELETE',
+        headers: {
+            // This token is required by Laravel for security
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+            'Accept': 'application/json'
+        }
+    })
+    .then(response => {
+        // 3. If the server says "OK", hide the song from the screen
+        if (response.ok) {
+            document.getElementById('song-row-' + songId).style.display = 'none';
+            alert('Song deleted!');
+        }
+    });
+}
+// DYNAMIC LIKE COMPONENT
+const likeBtns = document.querySelectorAll('.like-btn');
+const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+likeBtns.forEach(btn => {
+    btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        
+        const songId = this.getAttribute('data-id');
+        const svgIcon = this.querySelector('svg');
+
+        // Send background request to the server
+        fetch(`/songs/${songId}/like`, {
+            method: 'PATCH',
+            headers: {
+                'X-CSRF-TOKEN': csrfToken,
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if(data.success) {
+                // Dynamically change the heart color based on the server's response!
+                if(data.is_liked) {
+                    svgIcon.classList.remove('fill-none', 'text-zinc-400');
+                    svgIcon.classList.add('fill-current', 'text-red-500');
+                } else {
+                    svgIcon.classList.remove('fill-current', 'text-red-500');
+                    svgIcon.classList.add('fill-none', 'text-zinc-400');
+                }
+            }
+        })
+        .catch(error => console.error('Error toggling like:', error));
+    });
+});
+</script>
 @endsection

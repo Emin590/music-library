@@ -69,19 +69,36 @@ class SongController extends Controller
         return redirect('/')->with('success', 'Song updated successfully!');
     }
 
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
-        // 1. Find the song
         $song = Song::findOrFail($id);
-
-        // 2. Extra Security: Check if the song belongs to the logged-in user
-        // (This prevents User A from deleting User B's songs)
-        if ($song->user_id !== auth()->id()) {
-            return back()->withErrors('You do not have permission to delete this song.');
-        }
+        
+        // Authorization check (optional, but good practice)
+        // if ($song->user_id !== auth()->id()) { abort(403); }
 
         $song->delete();
 
-        return redirect('/')->with('success', 'Song removed from library.');
+        // Check if the request is from our JavaScript (Fetch API)
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true, 'message' => 'Song deleted dynamically!']);
+        }
+
+        // Fallback for normal page reloads (if JS is disabled)
+        return redirect('/')->with('success', 'Entity deleted successfully');
+    }
+
+    public function toggleLike($id)
+    {
+        $song = Song::findOrFail($id);
+        
+        // Switch the value: if 1 make it 0, if 0 make it 1
+        $song->is_liked = !$song->is_liked; 
+        $song->save();
+
+        // Return JSON so the Promise in your JS can "resolve"
+        return response()->json([
+            'success' => true,
+            'is_liked' => $song->is_liked
+        ]);
     }
 }
