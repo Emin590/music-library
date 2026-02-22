@@ -1,52 +1,64 @@
 @extends('layout')
+
 @section('content')
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $song->title }} - Details</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-zinc-900 text-white font-sans antialiased min-h-screen flex items-center justify-center p-6">
+<div class="flex items-center justify-center min-h-screen p-6">
+    <div class="w-full max-w-lg bg-black p-8 rounded-lg shadow-2xl border border-zinc-800">
+        <h1 class="text-3xl font-bold text-green-500 mb-6">Add New Song</h1>
 
-    <div class="w-full max-w-4xl bg-black rounded-xl overflow-hidden shadow-2xl border border-zinc-800 flex flex-col md:flex-row">
-        
-        <div class="md:w-1/2 relative bg-zinc-800">
-            <img src="{{ $song->album_cover ?? 'https://placehold.co/600x600' }}" 
-                 alt="Album Cover" 
-                 class="w-full h-full object-cover aspect-square">
-        </div>
+        <form action="/create" method="POST" id="songForm">
+            @csrf 
 
-        <div class="md:w-1/2 p-8 md:p-12 flex flex-col justify-center">
-            
-            <div class="uppercase tracking-wide text-sm text-green-500 font-semibold mb-2">Song Details</div>
-            
-            <h1 class="text-4xl md:text-5xl font-bold leading-tight mb-2">{{ $song->title }}</h1>
-            <p class="text-xl text-zinc-400 mb-6">{{ $song->artist }}</p>
-
-            <div class="grid grid-cols-2 gap-4 mb-8 border-t border-b border-zinc-800 py-6">
-                <div>
-                    <span class="block text-zinc-500 text-xs uppercase tracking-wider">Duration</span>
-                    <span class="text-lg">{{ $song->duration }}</span>
-                </div>
-                <div>
-                    <span class="block text-zinc-500 text-xs uppercase tracking-wider">Added On</span>
-                    <span class="text-lg">{{ $song->created_at->format('M d, Y') }}</span>
-                </div>
+            <div class="mb-4">
+                <label class="block text-zinc-400 text-sm font-bold mb-2" for="title">Song Title</label>
+                <input type="text" name="title" id="title" value="{{ old('title') }}"
+                    class="w-full bg-zinc-800 text-white border border-zinc-700 rounded py-3 px-4 focus:outline-none focus:border-green-500">
+                @error('title') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
             </div>
 
-            <div class="flex gap-4">
-                <a href="/" class="flex-1 bg-zinc-800 hover:bg-zinc-700 text-white text-center font-bold py-3 px-4 rounded-full transition">
-                    &larr; Back
-                </a>
+            <div class="mb-4">
+                <label class="block text-zinc-400 text-sm font-bold mb-2" for="artist">Artist Name</label>
+                <input type="text" name="artist" id="artist" value="{{ old('artist') }}"
+                    class="w-full bg-zinc-800 text-white border border-zinc-700 rounded py-3 px-4 focus:outline-none focus:border-green-500">
+                @error('artist') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+            </div>
+
+            <div class="flex gap-4 mb-6">
+                <div class="w-1/3">
+                    <label class="block text-zinc-400 text-sm font-bold mb-2">Duration</label>
+                    <input type="text" name="duration" id="duration" placeholder="3:45"
+                        class="w-full bg-zinc-800 text-white border border-zinc-700 rounded py-3 px-4 focus:outline-none">
+                </div>
                 
-                <a href="/{{ $song->id }}/edit" class="flex-1 bg-green-500 hover:bg-green-600 text-black text-center font-bold py-3 px-4 rounded-full transition">
-                    Edit Song
-                </a>
+                <div class="w-2/3">
+                    <label class="block text-zinc-400 text-sm font-bold mb-2">Cover URL</label>
+                    <input type="url" name="album_cover" id="album_cover"
+                        class="w-full bg-zinc-800 text-white border border-zinc-700 rounded py-3 px-4 focus:outline-none">
+                </div>
             </div>
 
-        </div>
+            <div class="flex items-center justify-end gap-4">
+                <a href="/" class="text-zinc-400 hover:text-white transition">Cancel</a>
+                <button type="submit" class="bg-green-500 hover:bg-green-600 text-black font-bold py-3 px-6 rounded-full transition transform hover:scale-105">
+                    Save Song
+                </button>
+            </div>
+        </form>
     </div>
+</div>
 
-</body>
-</html>
+<script>
+    // Client-side Validation
+    document.getElementById('songForm').addEventListener('submit', function(e) {
+        const title = document.getElementById('title').value;
+        const artist = document.getElementById('artist').value;
+
+        if (title.length < 3) {
+            e.preventDefault(); // Stop form from submitting
+            alert('The song title must be at least 3 characters long.');
+        } else if (artist === "") {
+            e.preventDefault();
+            alert('Artist name is required.');
+        }
+    });
+</script>
 @endsection
