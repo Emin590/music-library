@@ -9,11 +9,11 @@ class Song extends Model
 {
     use HasFactory;
 
-    protected $guarded = [];
+    // Use this instead of $guarded
+    protected $fillable = ['title', 'artist', 'duration', 'album_cover', 'user_id'];
 
     public function user()
     {
         return $this->belongsTo(User::class);
     }
 }
-

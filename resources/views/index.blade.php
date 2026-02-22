@@ -51,8 +51,12 @@
                 <p class="text-sm text-zinc-400 truncate mb-4">{{ $song->artist }}</p>
 
                 <div class="flex justify-end items-center gap-3 border-t border-zinc-600 pt-3 mt-2">
-                    <a href="/{{ $song->id }}" class="text-zinc-400 hover:text-white" title="View">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                    {{-- Update this part in your @foreach loop --}}
+                    <a href="/{{ $song->id }}" class="text-zinc-400 hover:text-white" title="View Details">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                        </svg>
                     </a>
 
                     <a href="/{{ $song->id }}/edit" class="text-blue-400 hover:text-blue-300" title="Edit">
@@ -74,7 +78,7 @@
 
     <footer class="h-16 bg-zinc-900 border-t border-zinc-800 px-6 flex items-center justify-between">
         <div class="text-zinc-400 text-sm">
-            <span class="text-green-500 font-bold">{{ $songs->count() }}</span> Songs in Library
+            <span class="text-green-500 font-bold">{{ count($songs) }}</span> Songs in Library
         </div>
         <div class="text-zinc-600 text-xs uppercase tracking-widest font-semibold">
             MusicLib &copy; 2026

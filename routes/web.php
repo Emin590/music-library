@@ -33,3 +33,6 @@ Route::middleware('auth')->group(function () {
 
 // 4. Wildcard Route (MUST be at the very bottom)
 Route::get('/{id}', [SongController::class, 'show']);
+
+// Place this at the bottom of your web.php
+Route::get('/{id}', [SongController::class, 'show'])->name('songs.show');

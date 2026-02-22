@@ -38,8 +38,12 @@ class SongController extends Controller
         return redirect('/')->with('success', 'Song added successfully!');
     }
 
-    public function show($id) {
+    public function show($id)
+    {
+        // Find the song or throw a 404 error if it doesn't exist
         $song = Song::findOrFail($id);
+
+        // Return the specific 'show' view with the song data
         return view('show', compact('song'));
     }
 
@@ -50,20 +54,19 @@ class SongController extends Controller
 
     public function update(Request $request, $id)
     {
-        $song = Song::findOrFail($id);
+        $song = Song::findOrFail($id); // Model interaction [cite: 41]
 
-        // 1. Server-Side Validation
+        // Form validation - a "Dynamic Component" feature [cite: 34, 116]
         $validated = $request->validate([
-            'title' => 'required|min:2|max:255',
-            'artist' => 'required|min:2|max:255',
-            'duration' => ['nullable', 'regex:/^[0-9]{1,2}:[0-9]{2}$/'], 
-            'album_cover' => 'nullable|url',
+            'title' => 'required',
+            'artist' => 'required',
+            'duration' => 'nullable',
+            'album_cover' => 'nullable|url'
         ]);
 
-        // 2. Update the record
-        $song->update($validated);
+        $song->update($validated); // Information storage [cite: 8]
 
-        return redirect('/' . $song->id)->with('success', 'Song updated successfully!');
+        return redirect('/')->with('success', 'Song updated successfully!');
     }
 
     public function destroy($id)
